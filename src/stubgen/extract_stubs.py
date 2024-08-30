@@ -17,12 +17,12 @@ from typing import Sequence
 from typing import Tuple
 from typing import TypeVar
 from typing import Union
-
 import clr
 from System import Delegate
 from System import MulticastDelegate
 from System import Nullable
 from System.Reflection import Assembly
+from System.Reflection import ReflectionTypeLoadException
 from System.Reflection import AssemblyName
 from System.Reflection import BindingFlags
 from System.Reflection import ConstructorInfo
@@ -515,9 +515,13 @@ def extract_nested_types(type_info: TypeInfo) -> Mapping[str, CTypeDefinition]:
 def extract_assembly(assembly_name: str, output_dir: Path, overwrite: bool) -> Union[int, str]:
     logger.info(f"Extracting assembly: %r", assembly_name)
 
-    assembly: Assembly = clr.AddReference(assembly_name)
-    name: AssemblyName = assembly.GetName()
+    try:
+        assembly: Assembly = clr.AddReference(assembly_name)
+    except Exception as e:
+        logger.error(f"Unable to load assembly {assembly_name}: {str(e)}")
+        return 1
 
+    name: AssemblyName = assembly.GetName()
     assembly_name: str = name.Name
     assembly_version: str = name.Version.ToString()
 
@@ -533,15 +537,41 @@ def extract_assembly(assembly_name: str, output_dir: Path, overwrite: bool) -> U
 
     logger.debug("Parsing types")
     type_definitions: Dict[str, List[CTypeDefinition]] = defaultdict(list)
-    info: TypeInfo
-    for info in assembly.GetTypes():
+
+    try:
+        types = assembly.GetTypes()
+    except ReflectionTypeLoadException as e:
+        logger.warning(f"Some types in {assembly_name} could not be loaded")
+        types = [t for t in e.Types if t is not None]
+        for ex in e.LoaderExceptions:
+            if ex:
+                logger.debug(f"Loader exception: {str(ex)}")
+
+    for info in types:
         if info.Namespace is None or info.IsNested:
             continue
-        type_definition: CTypeDefinition = extract_type_def(info)
-        if type_definition is None:
-            logger.warning("Unable to parse type: %s", info.FullName)
+        try:
+            type_definition: CTypeDefinition = extract_type_def(info)
+            if type_definition is None:
+                logger.warning(f"Unable to parse type: {info.FullName}")
+                continue
+            type_definitions[type_definition.namespace].append(type_definition)
+        except Exception as ex:
+            logger.warning(f"Error processing type {info.FullName}: {str(ex)}")
+
+    for info in types:
+        if info.Namespace is None or info.IsNested:
             continue
-        type_definitions[type_definition.namespace].append(type_definition)
+        try:
+            type_definition: CTypeDefinition = extract_type_def(info)
+            if type_definition is None:
+                logger.warning(f"Unable to parse type: {info.FullName}")
+                continue
+            type_definitions[type_definition.namespace].append(type_definition)
+        except Exception as ex:
+            logger.warning(f"Unexpected error processing {info.FullName}: {str(ex)}")
+        except Exception as ex:
+            logger.warning(f"Error processing type {info.FullName}: {str(ex)}")
 
     namespaces: Sequence[CNamespace] = tuple(
         CNamespace(name=namespace, types={str(t): t for t in sorted(type_list)})
