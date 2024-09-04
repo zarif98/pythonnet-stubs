@@ -7,14 +7,14 @@ Python.NET Stub Generator
 ## Usage:
 
     usage: stubgen [-h] [-v] [--verbose] [-o OUTPUT_DIR] [-m] command ...
-    
+
     A library for generating stubs of .NET libraries
-    
+
     positional arguments:
         command
             extract             extract types from assemblies to json
             build               build stub file tree
-    
+
     options:
         -h, --help            show this help message and exit
         -v, --version         show program's version number and exit
@@ -31,7 +31,7 @@ Generates a skeleton file for each assembly and a doc file for each namespace.
 
     positional arguments:
         assemblies            names of dll assemblies to process
-    
+
     options:
         -h, --help            show this help message and exit
         -s, --skip-failed     skips failed assemblies
@@ -43,23 +43,35 @@ Generates a skeleton file for each assembly and a doc file for each namespace.
 
 ## Build Usage:
 
-Generates stub files for each namespace in the skeleton files provided. Can optionally include doc strings provided in doc files. 
+Generates stub files for each namespace in the skeleton files provided. Can optionally include doc strings provided in doc files.
 
     usage: stubgen build [-h] [-l LINE_LENGTH] [-f] skeletons docs
 
     positional arguments:
         skeletons             glob to the skeleton files
         docs                  glob to the doc files
-    
+
     options:
         -h, --help            show this help message and exit
         -l LINE_LENGTH, --line-length LINE_LENGTH
                               process core assemblies
         -f, --format-files    format generated stub files
-    
+
 
 ## Examples:
 
     python -m stubgen -o output extract --overwrite mscorlib System System.Core
 
     python -m stubgen -o stubs build -f output/*_skeleton.json output/*_doc.json
+
+
+    python -m stubgen --verbose -m -o ..\output\ extract -s "C:\Users\zrahman\OneDrive - KLA Corporation\Documents\GitHub\pythonnet-stubs\Dlls\KLATencor.eCP.Infras.dll"
+
+    python -m stubgen --verbose -m -o ./stubs_output build -f ..\output\*_skeleton.json ..\output\*_doc.json
+
+python -m stubgen -o ../output --dll-directory "C:\Users\zrahman\OneDrive - KLA Corporation\Documents\GitHub\pythonnet-stubs\Dlls" extract
+
+python -m stubgen --verbose -m -o ..\output\ extract -s "C:\repos\CommonDev\BuildOutputs\Output\Run\Exec\Bin\KLATencor.Lotus.AppLogic.Vacuum.dll"
+
+
+
