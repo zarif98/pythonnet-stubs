@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Code Example",
+            "type": "python",
+            "request": "launch",
+            "program": "src\\stubgen\\",
+            "args": [
+                "--verbose",
+                "-m",
+                "-o",
+                "${workspaceFolder}//output",
+                "extract",
+                "--overwrite",
+                "-s",
+                "C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.eCP.Infras.dll",
+                //"C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.Lotus.AppLogic.Vacuum.dll",
+                //"C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.UA.Utils.dll",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+        }
+    ]
+}
