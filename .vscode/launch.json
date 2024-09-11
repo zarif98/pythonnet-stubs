@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Code Example",
+            "name": "Run PythonStubs",
             "type": "python",
             "request": "launch",
             "program": "src\\stubgen\\",
@@ -18,11 +18,67 @@
                 "--overwrite",
                 "-s",
                 "C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.eCP.Infras.dll",
+                "C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.Lotus.AppLogic.Vacuum.dll",
+                //"C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.UA.Utils.dll",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+        },
+        {
+            "name": "Debug PythonStubs",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src\\stubgen\\",
+            "args": [
+                "--verbose",
+                "-m",
+                "-o",
+                "C:\\repos\\CommonDev\\Lotus\\Cougar\\Net\\Scripts\\DiagnosticsWrappers\\StubsSkeletonOutput",
+                "extract",
+                "--overwrite",
+                "-s",
+                "C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.eCP.Infras.dll",
                 //"C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.Lotus.AppLogic.Vacuum.dll",
                 //"C:\\repos\\CommonDev\\BuildOutputs\\Output\\Run\\Exec\\Bin\\KLATencor.UA.Utils.dll",
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
+        },
+        {
+            "name": "Build Stubs",
+            "type": "python",
+            "request": "launch",
+            "module": "src\\stubgen\\",
+            "args": [
+                "--verbose",
+                "-m",
+                "-o",
+                "${workspaceFolder}//output",
+                "build",
+                "-f",
+                "..\\..\\output\\*_skeleton.json",
+                "..\\output\\*_doc.json"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        }
+        {
+            "name": "Build Stubs",
+            "type": "python",
+            "request": "launch",
+            "module": "src\\stubgen\\",
+            "args": [
+                "--verbose",
+                "-m",
+                "-o",
+                "${workspaceFolder}//output",
+                "build",
+                "-f",
+                "..\\..\\output\\*_skeleton.json",
+                "..\\output\\*_doc.json"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

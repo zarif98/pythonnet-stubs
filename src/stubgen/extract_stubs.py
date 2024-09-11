@@ -243,23 +243,46 @@ def extract_property(info: PropertyInfo) -> CProperty:
     )
 
 
-def extract_method(info: MethodInfo) -> CMethod:
-    return_types: List[CType] = [extract_type(info.ReturnType)]
+def extract_method(info: MethodInfo) -> Optional[CMethod]:
+    try:
+        return_types: List[CType] = []
+        parameters: List[CParameter] = []
 
-    parameters: List[CParameter] = []
-    for parameter_info in info.GetParameters():
-        parameter: CParameter = extract_parameter(parameter_info)
-        parameters.append(parameter)
-        if parameter.out:
-            return_types.append(parameter.type)
+        # Extract return type
+        try:
+            return_type = extract_type(info.ReturnType)
+            if return_type is not None:
+                return_types.append(return_type)
+        except Exception as e:
+            logger.warning(f"Error extracting return type for method {info.Name}: {str(e)}")
 
-    return CMethod(
-        name=make_python_name(info.Name),
-        declaring_type=extract_type(info.GetBaseDefinition().DeclaringType, use_generic=True),
-        parameters=tuple(parameters),
-        return_types=tuple(return_types),
-        static=info.IsStatic,
-    )
+        # Extract parameters
+        for parameter_info in info.GetParameters():
+            try:
+                parameter: CParameter = extract_parameter(parameter_info)
+                parameters.append(parameter)
+                if parameter.out:
+                    return_types.append(parameter.type)
+            except Exception as e:
+                logger.warning(f"Error extracting parameter for method {info.Name}: {str(e)}")
+
+        # Extract declaring type
+        try:
+            declaring_type = extract_type(info.GetBaseDefinition().DeclaringType, use_generic=True)
+        except Exception as e:
+            logger.warning(f"Error extracting declaring type for method {info.Name}: {str(e)}")
+            declaring_type = None
+
+        return CMethod(
+            name=make_python_name(info.Name),
+            declaring_type=declaring_type,
+            parameters=tuple(parameters),
+            return_types=tuple(return_types),
+            static=info.IsStatic,
+        )
+    except Exception as e:
+        logger.warning(f"Error extracting method {info.Name}: {str(e)}")
+        return None
 
 
 def extract_event(info: EventInfo) -> CEvent:
@@ -379,7 +402,7 @@ def extract_methods(type_info: TypeInfo) -> Mapping[str, CMethod]:
         if binding_flags is None:
             binding_flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static
         for info in type_info.GetMethods(binding_flags):
-            obj: CMethod = extract_method(info)
+            obj: Optional[CMethod] = extract_method(info)
             key: str = obj.to_doc_json()[0]
             found[key] = obj
 
@@ -622,7 +645,7 @@ def extract_assemblies(
     multi_threaded: bool,
 ) -> Union[int, str]:
     if multi_threaded:
-        executor: Executor = ThreadPoolExecutor(max_workers=16, thread_name_prefix="Worker")
+        executor: Executor = ThreadPoolExecutor(thread_name_prefix="Worker")
         for exit_code in executor.map(
             extract_assembly,
             assembly_names,

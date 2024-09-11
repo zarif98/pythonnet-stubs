@@ -64,14 +64,19 @@ Generates stub files for each namespace in the skeleton files provided. Can opti
 
     python -m stubgen -o stubs build -f output/*_skeleton.json output/*_doc.json
 
+    python -m stubgen --verbose -m -o ../../stubs_output build -f ..\..\output\*_skeleton.json ..\output\*_doc.json
 
-    python -m stubgen --verbose -m -o ..\output\ extract -s "C:\Users\zrahman\OneDrive - KLA Corporation\Documents\GitHub\pythonnet-stubs\Dlls\KLATencor.eCP.Infras.dll"
+    python -m stubgen --verbose -m -o "C:\repos\CommonDev\Lotus\Cougar\Net\Scripts\DiagnosticsWrappers\Stubs" build -f "C:\repos\CommonDev\Lotus\Cougar\Net\Scripts\DiagnosticsWrappers\StubsSkeletonOutput\*_skeleton.json" "C:\repos\CommonDev\Lotus\Cougar\Net\Scripts\DiagnosticsWrappers\StubsSkeletonOutput\*_doc.json"
 
-    python -m stubgen --verbose -m -o ./stubs_output build -f ..\output\*_skeleton.json ..\output\*_doc.json
+
+
+    ** must be in: PS C:\Users\zrahman\OneDrive - KLA Corporation\Documents\GitHub\pythonnet-stubs\src\stubgen>
 
 python -m stubgen -o ../output --dll-directory "C:\Users\zrahman\OneDrive - KLA Corporation\Documents\GitHub\pythonnet-stubs\Dlls" extract
 
-python -m stubgen --verbose -m -o ..\output\ extract -s "C:\repos\CommonDev\BuildOutputs\Output\Run\Exec\Bin\KLATencor.Lotus.AppLogic.Vacuum.dll"
+python -m stubgen --verbose -m -o ..\..\output\ extract -s "C:\repos\CommonDev\BuildOutputs\Output\Run\Exec\Bin\KLATencor.Lotus.AppLogic.Vacuum.dll"
+
+python -m stubgen -o ..\..\output extract --overwrite -s C:\repos\CommonDev\BuildOutputs\Output\Run\Exec\Bin\KLATencor.eCP.Infras.dll
 
 
 

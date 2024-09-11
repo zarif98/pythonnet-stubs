@@ -1,5 +1,7 @@
 import logging
 import sys
+import os
+import ast
 from argparse import ZERO_OR_MORE
 from argparse import ArgumentParser
 from argparse import Namespace
@@ -167,7 +169,11 @@ def main(*args: Any) -> Union[int, str]:
             elif use_core:
                 logger.debug("Adding core assemblies")
                 assembly_names.extend(CORE)
-            assemblies: Sequence[str] = parsed_args.assemblies
+            ##assemblies: Sequence[str] = parsed_args.assemblies
+            assemblies: Sequence[str] = find_dll_references(
+                r"C:\repos\CommonDev\Lotus\Cougar\Net\Scripts\DiagnosticsWrappers",
+                r"C:\repos\CommonDev\BuildOutputs\Output\Run\Exec\Bin",
+            )
             assembly_names.extend(assemblies)
             assembly_names = list(dict.fromkeys(assembly_names).keys())
 
@@ -213,6 +219,42 @@ def main(*args: Any) -> Union[int, str]:
         exit_code = str(e)
 
     return exit_code
+
+
+import os
+import glob
+
+
+def find_dll_references(script_folder_path: str, dll_folder_path: str) -> Sequence[str]:
+    script_paths = glob.glob(os.path.join(script_folder_path, "*.py"))
+
+    dll_names: List[str] = []
+
+    for script_path in script_paths:
+        try:
+            with open(script_path, "r") as file:
+                tree = ast.parse(file.read())
+        except Exception as e:
+            logger.error(f"Unable to read script: {script_path}: {str(e)}")
+
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "AddReference"
+            ):
+                dll_name = node.args[0].s
+                logger.debug(f"Found DLL reference: {dll_name}")
+                dll_names.append(dll_name)
+
+    dll_paths = []
+    for dll_name in dll_names:
+        dll_path = os.path.join(dll_folder_path, dll_name + ".dll")
+        if os.path.exists(dll_path):
+            logger.debug(f"Found DLL path: {dll_path}")
+            dll_paths.append(dll_path)
+
+    return dll_paths
 
 
 if __name__ == "__main__":
